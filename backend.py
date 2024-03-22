@@ -230,7 +230,6 @@ class Payment:
 
     def shedule(self, order_id, payment_id, name, price, user_id, msg_id, bot, key, product_id):
         c = 0
-        one = True
         keys = list()
         while True:
             try:
@@ -252,14 +251,21 @@ class Payment:
                     bot.send_message(user_id, "Время на оплату истекло, попробуйте ещё раз")
                     break # end deny pay
                 elif status in ['AUTH_FAIL', 'REJECTED']:
-                    if one:
-                        one = False
-                        timee = time.time()
-                        self.__db_act.update_sale(timee, False, order_id)
-                        self.__sheet.add_sale(
-                            [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price, 'Отклонена',
-                             user_id, 'Нет'])
-                        bot.send_message(user_id, "Оплата не успешна, попробуйте ещё раз")
+                    timee = time.time()
+                    self.__db_act.update_sale(timee, False, order_id)
+                    self.__sheet.add_sale(
+                        [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price,
+                         'Отклонена',
+                         user_id, 'Нет'])
+                    product = self.__db_act.get_product_by_id_for_buy(product_id)
+                    for i in product[2].split(','):
+                        if i != '':
+                            keys.append(i)
+                    keys.append(key)
+                    self.__db_act.update_product(','.join(keys), 'key', product_id)
+                    bot.delete_message(user_id, msg_id)
+                    bot.send_message(user_id, "Оплата не успешна, попробуйте ещё раз")
+                    break
                 elif status in ['CONFIRMED', 'AUTHORIZED']:
                     timee = time.time()
                     self.__db_act.update_sale(timee, True, order_id)
