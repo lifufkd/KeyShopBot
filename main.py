@@ -485,7 +485,6 @@ def main():
                 else:
                     keys = list()
                     profuct_id = command[3:]
-                    temp_user_data.temp_data(user_id)[user_id]
                     product = db_actions.get_product_by_id_for_buy(profuct_id)
                     out = list()
                     for i in temp_user_data.temp_data(user_id)[user_id][8]:
@@ -531,8 +530,6 @@ def main():
                             temp_user_data.temp_data(user_id)[user_id][10] = True
                             msg_id = bot.send_message(user_id, 'Подождите 10 минут, чтобы купить новый товар').message_id
                             threading.Thread(target=ban_10, args=(msg_id, )).start()
-                        else:
-                            bot.send_message(user_id, 'Подождите 10 минут, чтобы купить новый товар')
 
             elif command[:9] == 'purchased':
                 if command[9:] == '<main>':
