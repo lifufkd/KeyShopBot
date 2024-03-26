@@ -285,34 +285,22 @@ class Payment:
                 pass
             time.sleep(1)
 
-    def get_sha_key(self):
-        t = []
-        r = {
-            "TerminalKey": self.__config.get_config()['token'],
-            "Amount": 1000,
-            "OrderId": "1",
-            "Password": self.__config.get_config()['terminal_password']
-        }
-        for key, value in r.items():
-            t.append({key: value})
-        t = sorted(t, key=lambda x: list(x.keys())[0])
-        t = "".join(str(value) for item in t for value in item.values())
-        sha256 = hashlib.sha256()
-        sha256.update(t.encode('utf-8'))
-        t = sha256.hexdigest()
-        return t
+    def get_sha_key(self, amount, order_id, desc):
+        s = f"{amount}{desc}{order_id}{self.__config.get_config()['terminal_password']}{self.__config.get_config()['token']}"
+        print(s)
+        return hashlib.sha256(s.encode('utf-8')).hexdigest()
 
     def create_new_payment(self, name, price, desc, order_id):
         api_url = "https://securepay.tinkoff.ru/v2/Init"
         payload = {
-            "TerminalKey": self.__config.get_config()['token'],
-            "Amount": price*100,
-            "OrderId": order_id,
-            "Description": f"Покупка товара {name}",
-            "Token": self.get_sha_key(),
-            "DATA": {
-                "Email": "ваша@почта.ru"},
-            "Receipt": {
+                "TerminalKey": str(self.__config.get_config()['token']),
+                "Amount": price*100,
+                "OrderId": order_id,
+                "Token": self.get_sha_key(price*100, order_id, name),
+                "Description": name,
+                "DATA": {
+                    "Email": "ваша@почта.ru"},
+                "Receipt": {
                 "Email": "ваша@почта.ru",
                 "Taxation": "osn",
                 "Items": [
@@ -327,6 +315,7 @@ class Payment:
             }
         }
         response = requests.post(api_url, json=payload).json()
+        print(response)
         return [response['PaymentURL'], response['PaymentId']]
 
     def check_payment(self, payment_id, order_id):

@@ -27,6 +27,7 @@ def get_subcot():
         s += f'{i[0]}. {i[1]}\n'
     return s
 
+
 def ban_10(user_id, msg_id):
     tt = 0
     while True:
@@ -493,7 +494,7 @@ def main():
                             data = i
                         out.append(i[3])
                     if temp_user_data.temp_data(user_id)[user_id][9] <= 3:
-                        if profuct_id in out:
+                        if profuct_id not in out:
                             for i in product[2].split(','):
                                 if i != '':
                                     keys.append(i)
@@ -510,7 +511,8 @@ def main():
                                     temp_user_data.temp_data(user_id)[user_id][9] += 1
                                     temp_user_data.temp_data(user_id)[user_id][8].append([msg_id, price, order[0], profuct_id])
                                     threading.Thread(target=payment.shedule, args=(order_id, order[1], product[0], price, user_id, msg_id, bot, key, profuct_id, index_cache)).start()
-                                except:
+                                except Exception as e:
+                                    print(e)
                                     for i in product[2].split(','):
                                         if i != '':
                                             keys.append(i)
@@ -529,7 +531,7 @@ def main():
                         if not temp_user_data.temp_data(user_id)[user_id][10]:
                             temp_user_data.temp_data(user_id)[user_id][10] = True
                             msg_id = bot.send_message(user_id, 'Подождите 10 минут, чтобы купить новый товар').message_id
-                            threading.Thread(target=ban_10, args=(msg_id, )).start()
+                            threading.Thread(target=ban_10(msg_id), args=(msg_id, )).start()
 
             elif command[:9] == 'purchased':
                 if command[9:] == '<main>':
