@@ -5,6 +5,7 @@
 #####################################
 from datetime import datetime
 import os
+import time
 import platform
 import telebot
 import random
@@ -25,6 +26,17 @@ def get_subcot():
     for i in data:
         s += f'{i[0]}. {i[1]}\n'
     return s
+
+def ban_10(user_id, msg_id):
+    tt = 0
+    while True:
+        tt += 1
+        if tt >= 600:
+            bot.delete_message(user_id, msg_id)
+            temp_user_data.temp_data(user_id)[user_id][10] = False
+            temp_user_data.temp_data(user_id)[user_id][9] = 0
+            break
+        time.sleep(1)
 
 def get_preview():
     s = ''
@@ -472,31 +484,56 @@ def main():
                     start_menu(call.message, buttons)
                 else:
                     keys = list()
-                    product = db_actions.get_product_by_id_for_buy(command[3:])
-                    for i in product[2].split(','):
-                        if i != '':
-                            keys.append(i)
-                    if len(keys) != 0:
-                        key = random.choice(keys)
-                        keys.remove(key)
-                        db_actions.update_product(','.join(keys), 'key', command[3:])
-                        price = product[1] - (int(product[1] / 100) * ((product[1] // config.get_config()['step_sale']) * config.get_config()['percent_sale']))
-                        try:
-                            order_id = db_actions.add_sale([0, product[0], price, False, f'@{tg_nick}', user_id, key, command[3:]])
-                            order = payment.create_new_payment(f'Активационный ключ для {product[0]}', price, product[3], order_id)
-                            msg_id = bot.send_message(user_id, 'Оплатить заказ', reply_markup=buttons.pay_btn(price, order[0])).message_id
-                            threading.Thread(target=payment.shedule, args=(order_id, order[1], product[0], price, user_id, msg_id, bot, key, command[3:])).start()
-                        except:
+                    profuct_id = command[3:]
+                    temp_user_data.temp_data(user_id)[user_id]
+                    product = db_actions.get_product_by_id_for_buy(profuct_id)
+                    out = list()
+                    for i in temp_user_data.temp_data(user_id)[user_id][8]:
+                        if i[3] == profuct_id:
+                            index = temp_user_data.temp_data(user_id)[user_id][8].index(i)
+                            data = i
+                        out.append(i[3])
+                    if temp_user_data.temp_data(user_id)[user_id][9] <= 3:
+                        if profuct_id in out:
                             for i in product[2].split(','):
                                 if i != '':
                                     keys.append(i)
-                            keys.append(key)
-                            db_actions.update_product(','.join(keys), 'key', command[3:])
-                            bot.send_message(user_id, 'Произошла ошибка, попробуйте ещё раз')
-                    elif db_actions.check_already_open_sale(user_id) > 0:
-                        bot.answer_callback_query(call.id, "Оплатите предыдущий заказ", show_alert=True)
+                            if len(keys) != 0:
+                                key = random.choice(keys)
+                                keys.remove(key)
+                                db_actions.update_product(','.join(keys), 'key', profuct_id)
+                                price = product[1] - (int(product[1] / 100) * ((product[1] // config.get_config()['step_sale']) * config.get_config()['percent_sale']))
+                                try:
+                                    order_id = db_actions.add_sale([0, product[0], price, False, f'@{tg_nick}', user_id, key, profuct_id])
+                                    order = payment.create_new_payment(f'Активационный ключ для {product[0]}', price, product[3], order_id)
+                                    msg_id = bot.send_message(user_id, 'Оплатить заказ', reply_markup=buttons.pay_btn(price, order[0])).message_id
+                                    index_cache = len(temp_user_data.temp_data(user_id)[user_id][8])
+                                    temp_user_data.temp_data(user_id)[user_id][9] += 1
+                                    temp_user_data.temp_data(user_id)[user_id][8].append([msg_id, price, order[0], profuct_id])
+                                    threading.Thread(target=payment.shedule, args=(order_id, order[1], product[0], price, user_id, msg_id, bot, key, profuct_id, index_cache)).start()
+                                except:
+                                    for i in product[2].split(','):
+                                        if i != '':
+                                            keys.append(i)
+                                    keys.append(key)
+                                    db_actions.update_product(','.join(keys), 'key', profuct_id)
+                                    bot.send_message(user_id, 'Произошла ошибка, попробуйте ещё раз')
+                            elif db_actions.check_already_open_sale(user_id) > 0:
+                                bot.answer_callback_query(call.id, "Оплатите предыдущий заказ", show_alert=True)
+                            else:
+                                bot.answer_callback_query(call.id, "Ключей нет в наличии", show_alert=True)
+                        else:
+                            bot.delete_message(user_id, data[0])
+                            temp_user_data.temp_data(user_id)[user_id][8][index][0] = bot.send_message(user_id, 'Оплатить заказ',
+                                                          reply_markup=buttons.pay_btn(data[1], data[2])).message_id
                     else:
-                        bot.answer_callback_query(call.id, "Ключей нет в наличии", show_alert=True)
+                        if not temp_user_data.temp_data(user_id)[user_id][10]:
+                            temp_user_data.temp_data(user_id)[user_id][10] = True
+                            msg_id = bot.send_message(user_id, 'Подождите 10 минут, чтобы купить новый товар').message_id
+                            threading.Thread(target=ban_10, args=(msg_id, )).start()
+                        else:
+                            bot.send_message(user_id, 'Подождите 10 минут, чтобы купить новый товар')
+
             elif command[:9] == 'purchased':
                 if command[9:] == '<main>':
                     if temp_user_data.temp_data(user_id)[user_id][4] is not None:
@@ -523,6 +560,6 @@ if '__main__' == __name__:
     db = DB(config.get_config()['db_file_name'], Lock())
     sheet = Excell(db)
     db_actions = DbAct(db, config)
-    payment = Payment(config, db_actions, sheet)
+    payment = Payment(config, db_actions, sheet, temp_user_data)
     bot = telebot.TeleBot(config.get_config()['tg_api'])
     main()
