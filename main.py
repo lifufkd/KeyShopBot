@@ -36,7 +36,7 @@ def check_spam(user_id):
                 return True
             else:
                 temp_user_data.temp_data(user_id)[user_id][12] = int(time.time()) + 1800
-                bot.send_message(user_id, 'Вы заблокированы за спам на 30 минут')
+                bot.send_message(user_id, 'Вы заблокированы за спам на 30 минут', parse_mode='HTML')
     else:
         return True
 
@@ -105,7 +105,7 @@ def main():
                         bot.send_message(message.chat.id, f'Здравствуйте, {message.from_user.first_name}!\nТекущий шаг скидки {config.get_config()["step_sale"]}, процент за шаг {config.get_config()["percent_sale"]}',
                                          reply_markup=buttons.admin_btns(), parse_mode='HTML')
             else:
-                bot.send_message(message.chat.id, 'Введите /start для запуска бота')
+                bot.send_message(message.chat.id, 'Введите /start для запуска бота', parse_mode='HTML')
 
     @bot.message_handler(content_types=['text', 'photo'])
     def text_message(message):
@@ -124,63 +124,63 @@ def main():
                             photo_bytes = bot.download_file(photo_file.file_path)
                             temp_user_data.temp_data(user_id)[user_id][1][0] = photo_bytes
                             temp_user_data.temp_data(user_id)[user_id][0] = 1
-                            bot.send_message(message.chat.id, '💸Отправьте цену товара💸')
+                            bot.send_message(message.chat.id, '💸Отправьте цену товара💸', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не фото❌')
+                            bot.send_message(message.chat.id, '❌Это не фото❌', parse_mode='HTML')
                     elif status == 1:
                         if user_input is not None:
                             try:
                                 temp_user_data.temp_data(user_id)[user_id][1][1] = int(user_input)
                                 temp_user_data.temp_data(user_id)[user_id][0] = 2
-                                bot.send_message(message.chat.id, 'Отправьте активационный ключ🔑')
+                                bot.send_message(message.chat.id, 'Отправьте активационный ключ🔑', parse_mode='HTML')
                             except:
-                                bot.send_message(message.chat.id, '❌Сумма неверна❌')
+                                bot.send_message(message.chat.id, '❌Сумма неверна❌', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 2:
                         if user_input is not None:
                             temp_user_data.temp_data(user_id)[user_id][1][2] = user_input
                             temp_user_data.temp_data(user_id)[user_id][0] = 3
-                            bot.send_message(message.chat.id, 'Введите описание товара📨')
+                            bot.send_message(message.chat.id, 'Введите описание товара📨', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 3:
                         if user_input is not None:
                             temp_user_data.temp_data(user_id)[user_id][1][3] = user_input
                             temp_user_data.temp_data(user_id)[user_id][0] = 4
                             bot.send_message(message.chat.id,
-                                             f'Отправьте ID подкатегории\nДоступные варианты:\n{get_subcot()}')
+                                             f'Отправьте ID подкатегории\nДоступные варианты:\n{get_subcot()}', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 4:
                         if user_input is not None:
                             temp_user_data.temp_data(user_id)[user_id][1][4] = user_input
                             temp_user_data.temp_data(user_id)[user_id][0] = 12
-                            bot.send_message(message.chat.id, 'Отправьте превью')
+                            bot.send_message(message.chat.id, 'Отправьте превью', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 5:
                         if user_input is not None:
                             if db_actions.check_product_id_exist(user_input):
                                 temp_user_data.temp_data(user_id)[user_id][2] = user_input
                                 temp_user_data.temp_data(user_id)[user_id][0] = None
                                 bot.send_message(message.chat.id, 'Что вы хотите изменить/добавить✏️',
-                                                 reply_markup=buttons.change_btns())
+                                                 reply_markup=buttons.change_btns(), parse_mode='HTML')
                             else:
-                                bot.send_message(message.chat.id, '❌ID продукта не существует❌')
+                                bot.send_message(message.chat.id, '❌ID продукта не существует❌', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 6:
                         if user_input is not None:
                             try:
                                 db_actions.update_product(int(user_input), 'price',
                                                           temp_user_data.temp_data(user_id)[user_id][2])
                                 temp_user_data.temp_data(user_id)[user_id][0] = None
-                                bot.send_message(user_id, '✅Операция завершена успешно✅')
+                                bot.send_message(user_id, '✅Операция завершена успешно✅', parse_mode='HTML')
                             except:
-                                bot.send_message(user_id, '❌Сумма неверна❌')
+                                bot.send_message(user_id, '❌Сумма неверна❌', parse_mode='HTML')
                         else:
-                            bot.send_message(user_id, '❌Это не текст❌')
+                            bot.send_message(user_id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 7:
                         if photo is not None:
                             photo_id = photo[-1].file_id
@@ -189,9 +189,9 @@ def main():
                             db_actions.update_product(photo_bytes, 'photo',
                                                       temp_user_data.temp_data(user_id)[user_id][2])
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(user_id, '✅Операция завершена успешно✅')
+                            bot.send_message(user_id, '✅Операция завершена успешно✅', parse_mode='HTML')
                         else:
-                            bot.send_message(user_id, '❌Это не фото❌')
+                            bot.send_message(user_id, '❌Это не фото❌', parse_mode='HTML')
                     elif status == 8:
                         if user_input is not None:
                             old_keys = db_actions.get_all_keys_product(temp_user_data.temp_data(user_id)[user_id][2])
@@ -200,161 +200,161 @@ def main():
                             db_actions.update_product(new_keys, 'key',
                                                       temp_user_data.temp_data(user_id)[user_id][2])
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(user_id, '✅Операция завершена успешно✅')
+                            bot.send_message(user_id, '✅Операция завершена успешно✅', parse_mode='HTML')
                         else:
-                            bot.send_message(user_id, '❌Это не текст❌')
+                            bot.send_message(user_id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 9:
                         if user_input is not None:
                             db_actions.update_product(user_input, 'category',
                                                       temp_user_data.temp_data(user_id)[user_id][2])
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(user_id, '✅Операция завершена успешно✅')
+                            bot.send_message(user_id, '✅Операция завершена успешно✅', parse_mode='HTML')
                         else:
-                            bot.send_message(user_id, '❌Это не текст❌')
+                            bot.send_message(user_id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 10:
                         if user_input is not None:
                             db_actions.update_product(user_input, 'description',
                                                       temp_user_data.temp_data(user_id)[user_id][2])
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(user_id, '✅Операция завершена успешно✅')
+                            bot.send_message(user_id, '✅Операция завершена успешно✅', parse_mode='HTML')
                         else:
-                            bot.send_message(user_id, '❌Это не текст❌')
+                            bot.send_message(user_id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 11:
                         if user_input is not None:
                             db_actions.update_product(user_input, 'preview',
                                                       temp_user_data.temp_data(user_id)[user_id][2])
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(user_id, '✅Операция завершена успешно✅')
+                            bot.send_message(user_id, '✅Операция завершена успешно✅', parse_mode='HTML')
                         else:
-                            bot.send_message(user_id, '❌Это не текст❌')
+                            bot.send_message(user_id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 12:
                         if user_input is not None:
                             temp_user_data.temp_data(user_id)[user_id][1][5] = user_input
                             temp_user_data.temp_data(user_id)[user_id][0] = 18
-                            bot.send_message(message.chat.id, 'Введите ссылку на дистрибутив')
+                            bot.send_message(message.chat.id, 'Введите ссылку на дистрибутив', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 13:
                         if user_input is not None:
                             config.change_contacts(user_input)
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 14:
                         if user_input is not None:
                             config.change_faq(user_input)
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 15:
                         if user_input is not None:
                             config.change_start_msg(user_input)
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 16:
                         try:
                             config.change_step(int(user_input))
                             temp_user_data.temp_data(user_id)[user_id][0] = 17
-                            bot.send_message(message.chat.id, 'Введите процент скидки')
+                            bot.send_message(message.chat.id, 'Введите процент скидки', parse_mode='HTML')
                         except:
-                            bot.send_message(message.chat.id, '❌Это не число❌')
+                            bot.send_message(message.chat.id, '❌Это не число❌', parse_mode='HTML')
                     elif status == 17:
                         try:
                             config.change_percent(int(user_input))
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         except:
-                            bot.send_message(message.chat.id, '❌Это не число❌')
+                            bot.send_message(message.chat.id, '❌Это не число❌', parse_mode='HTML')
                     elif status == 18:
                         if user_input is not None:
                             temp_user_data.temp_data(user_id)[user_id][1][6] = user_input
                             temp_user_data.temp_data(user_id)[user_id][0] = 19
-                            bot.send_message(message.chat.id, 'Введите ссылку на инструкцию по активации')
+                            bot.send_message(message.chat.id, 'Введите ссылку на инструкцию по активации', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Вы ввели неверное значение❌')
+                            bot.send_message(message.chat.id, '❌Вы ввели неверное значение❌', parse_mode='HTML')
                     elif status == 19:
                         if user_input is not None:
                             temp_user_data.temp_data(user_id)[user_id][1][7] = user_input
                             temp_user_data.temp_data(user_id)[user_id][0] = None
                             db_actions.add_one_product(temp_user_data.temp_data(user_id)[user_id][1])
-                            bot.send_message(message.chat.id, '✅Товар успешно добавлен✅')
+                            bot.send_message(message.chat.id, '✅Товар успешно добавлен✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Вы ввели неверное значение❌')
+                            bot.send_message(message.chat.id, '❌Вы ввели неверное значение❌', parse_mode='HTML')
                     elif status == 20:
                         if user_input is not None:
                             db_actions.update_product(user_input, 'instruction_url',
                                                       temp_user_data.temp_data(user_id)[user_id][2])
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(user_id, '✅Операция завершена успешно✅')
+                            bot.send_message(user_id, '✅Операция завершена успешно✅', parse_mode='HTML')
                         else:
-                            bot.send_message(user_id, '❌Это не текст❌')
+                            bot.send_message(user_id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 21:
                         if user_input is not None:
                             db_actions.update_product(user_input, 'distro_url',
                                                       temp_user_data.temp_data(user_id)[user_id][2])
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(user_id, '✅Операция завершена успешно✅')
+                            bot.send_message(user_id, '✅Операция завершена успешно✅', parse_mode='HTML')
                         else:
-                            bot.send_message(user_id, '❌Это не текст❌')
+                            bot.send_message(user_id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 22:
                         if user_input is not None:
                             config.change_text_cat(user_input)
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 23:
                         if user_input is not None:
                             config.change_text_precat(user_input)
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 24:
                         if user_input is not None:
                             config.change_text_product(user_input)
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 25:
                         if user_input is not None:
                             db_actions.delete_product(user_input)
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 26:
                         if user_input is not None:
                             db_actions.delete_category(user_input)
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                     elif status == 27:
                         if user_input is not None:
                             db_actions.delete_subcot(user_input)
                             temp_user_data.temp_data(user_id)[user_id][0] = None
-                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅')
+                            bot.send_message(message.chat.id, '✅Изменения успешно сохранены✅', parse_mode='HTML')
                         else:
-                            bot.send_message(message.chat.id, '❌Это не текст❌')
+                            bot.send_message(message.chat.id, '❌Это не текст❌', parse_mode='HTML')
                 else:
                     if message.text == '👤 Профиль':
                         temp_user_data.temp_data(user_id)[user_id][7] = bot.send_message(message.chat.id,
                                          f'Привет, {message.from_user.first_name}!\nВаш ID: {user_id}',
-                                         reply_markup=buttons.profile_btns()).message_id
+                                         reply_markup=buttons.profile_btns(), parse_mode='HTML').message_id
                     elif message.text == '🗂 Каталог продуктов':
                         categories = db_actions.get_categories()
                         temp_user_data.temp_data(user_id)[user_id][6] = bot.send_message(message.chat.id, config.get_config()['text_category'],
                                          reply_markup=buttons.categories_btns(categories), parse_mode='HTML').message_id
                     elif message.text == '👨‍💻 Поддержка':
-                        temp_user_data.temp_data(user_id)[user_id][7] = bot.send_message(message.chat.id, 'Выберите действие✅', reply_markup=buttons.support_btns()).message_id
+                        temp_user_data.temp_data(user_id)[user_id][7] = bot.send_message(message.chat.id, 'Выберите действие✅', reply_markup=buttons.support_btns(), parse_mode='HTML').message_id
             else:
-                bot.send_message(message.chat.id, 'Введите /start для запуска бота')
+                bot.send_message(message.chat.id, 'Введите /start для запуска бота', parse_mode='HTML')
 
     @bot.callback_query_handler(func=lambda call: True)
     def callback(call):
@@ -368,7 +368,7 @@ def main():
                 if db_actions.user_is_admin(user_id):
                     if command == 'addproduct':
                         temp_user_data.temp_data(user_id)[user_id][0] = 0
-                        bot.send_message(call.message.chat.id, 'Отправьте фото товара🖼')
+                        bot.send_message(call.message.chat.id, 'Отправьте фото товара🖼', parse_mode='HTML')
                     elif command == 'importproducts':
                         db_actions.update_products_from_excell(sheet.products_excell())
                     elif command == 'importcategories':
@@ -377,66 +377,66 @@ def main():
                         db_actions.update_subcategories_from_excell(sheet.subcategories_excell())
                     elif command == 'changeproduct':
                         temp_user_data.temp_data(user_id)[user_id][0] = 5
-                        bot.send_message(call.message.chat.id, '💎Введите ID товара💎')
+                        bot.send_message(call.message.chat.id, '💎Введите ID товара💎', parse_mode='HTML')
                     elif command[:10] == 'сhangecart':
                         if command[10:] == '1':
                             temp_user_data.temp_data(user_id)[user_id][0] = 6
-                            bot.send_message(call.message.chat.id, '💸Введите новую цену💸')
+                            bot.send_message(call.message.chat.id, '💸Введите новую цену💸', parse_mode='HTML')
                         elif command[10:] == '2':
                             temp_user_data.temp_data(user_id)[user_id][0] = 7
-                            bot.send_message(call.message.chat.id, '🖼Введите новую обложку🖼')
+                            bot.send_message(call.message.chat.id, '🖼Введите новую обложку🖼', parse_mode='HTML')
                         elif command[10:] == '3':
                             temp_user_data.temp_data(user_id)[user_id][0] = 8
-                            bot.send_message(call.message.chat.id, '🔑Введите новый ключ🔑')
+                            bot.send_message(call.message.chat.id, '🔑Введите новый ключ🔑', parse_mode='HTML')
                         elif command[10:] == '4':
                             temp_user_data.temp_data(user_id)[user_id][0] = 9
                             bot.send_message(call.message.chat.id,
-                                             f'✉️Введите новую подкатегорию для товара✉️\nДоступные варианты:\n{get_subcot()}')
+                                             f'✉️Введите новую подкатегорию для товара✉️\nДоступные варианты:\n{get_subcot()}', parse_mode='HTML')
                         elif command[10:] == '5':
                             temp_user_data.temp_data(user_id)[user_id][0] = 10
-                            bot.send_message(call.message.chat.id, '🪪Введите новое описание🪪')
+                            bot.send_message(call.message.chat.id, '🪪Введите новое описание🪪', parse_mode='HTML')
                         elif command[10:] == '6':
                             temp_user_data.temp_data(user_id)[user_id][0] = 11
-                            bot.send_message(call.message.chat.id, '🪪Введите новое превью🪪')
+                            bot.send_message(call.message.chat.id, '🪪Введите новое превью🪪', parse_mode='HTML')
                         elif command[10:] == '7':
                             temp_user_data.temp_data(user_id)[user_id][0] = 20
-                            bot.send_message(call.message.chat.id, '🪪Введите новую ссылку на скачивание инструкции по активации🪪')
+                            bot.send_message(call.message.chat.id, '🪪Введите новую ссылку на скачивание инструкции по активации🪪', parse_mode='HTML')
                         elif command[10:] == '8':
                             temp_user_data.temp_data(user_id)[user_id][0] = 21
-                            bot.send_message(call.message.chat.id, '🪪Введите новую ссылку на дистрибутив🪪')
+                            bot.send_message(call.message.chat.id, '🪪Введите новую ссылку на дистрибутив🪪', parse_mode='HTML')
                     elif command == 'changecontact':
-                        bot.send_message(call.message.chat.id, '👤Введите новый контакт👤')
+                        bot.send_message(call.message.chat.id, '👤Введите новый контакт👤', parse_mode='HTML')
                         temp_user_data.temp_data(user_id)[user_id][0] = 13
                     elif command == 'changefaq':
-                        bot.send_message(call.message.chat.id, '💎Введите новый FAQ💎')
+                        bot.send_message(call.message.chat.id, '💎Введите новый FAQ💎', parse_mode='HTML')
                         temp_user_data.temp_data(user_id)[user_id][0] = 14
                     elif command == 'changestartmsg':
-                        bot.send_message(call.message.chat.id, '✉️Введите новое стартовое сообщение✉️')
+                        bot.send_message(call.message.chat.id, '✉️Введите новое стартовое сообщение✉️', parse_mode='HTML')
                         temp_user_data.temp_data(user_id)[user_id][0] = 15
                     elif command == 'changesale':
                         temp_user_data.temp_data(user_id)[user_id][0] = 16
-                        bot.send_message(call.message.chat.id, '✉️Введите шаг скидки✉️')
+                        bot.send_message(call.message.chat.id, '✉️Введите шаг скидки✉️', parse_mode='HTML')
                     elif command == 'changecat':
                         temp_user_data.temp_data(user_id)[user_id][0] = 22
-                        bot.send_message(call.message.chat.id, '✉️Введите новый текст отображаемый в меню категории✉️')
+                        bot.send_message(call.message.chat.id, '✉️Введите новый текст отображаемый в меню категории✉️', parse_mode='HTML')
                     elif command == 'changeprecat':
                         temp_user_data.temp_data(user_id)[user_id][0] = 23
-                        bot.send_message(call.message.chat.id, '✉️Введите новый текст отображаемый в меню подкатегории✉️')
+                        bot.send_message(call.message.chat.id, '✉️Введите новый текст отображаемый в меню подкатегории✉️', parse_mode='HTML')
                     elif command == 'changeprod':
                         temp_user_data.temp_data(user_id)[user_id][0] = 24
-                        bot.send_message(call.message.chat.id, '✉️Введите новый текст отображаемый в меню товаров✉️')
+                        bot.send_message(call.message.chat.id, '✉️Введите новый текст отображаемый в меню товаров✉️', parse_mode='HTML')
                     elif command == 'delete_product':
                         bot.send_message(call.message.chat.id,
-                                         f'️Из какой категории вы хотите удалить?', reply_markup=buttons.delete_btns())
+                                         f'️Из какой категории вы хотите удалить?', reply_markup=buttons.delete_btns(), parse_mode='HTML')
                     elif command == 'delete_prod':
                         temp_user_data.temp_data(user_id)[user_id][0] = 25
-                        bot.send_message(call.message.chat.id, f'️Введите ID товара из списка который хотите удалить:\n{get_preview()}')
+                        bot.send_message(call.message.chat.id, f'️Введите ID товара из списка который хотите удалить:\n{get_preview()}', parse_mode='HTML')
                     elif command == 'delete_cat':
                         temp_user_data.temp_data(user_id)[user_id][0] = 26
-                        bot.send_message(call.message.chat.id, f'️Введите ID категории из списка которую хотите удалить:\n{get_category()}')
+                        bot.send_message(call.message.chat.id, f'️Введите ID категории из списка которую хотите удалить:\n{get_category()}', parse_mode='HTML')
                     elif command == 'delete_precat':
                         temp_user_data.temp_data(user_id)[user_id][0] = 27
-                        bot.send_message(call.message.chat.id, f'️Введите ID подкатегории из списка которую хотите удалить:\n{get_subcot()}')
+                        bot.send_message(call.message.chat.id, f'️Введите ID подкатегории из списка которую хотите удалить:\n{get_subcot()}', parse_mode='HTML')
                 if command[:10] == 'categories':
                     if command[10:] == '<main>':
                         bot.delete_message(user_id, message_id)
@@ -478,13 +478,13 @@ def main():
                             bot.delete_message(user_id, temp_user_data.temp_data(user_id)[user_id][3])
                         keys_left = len(db_actions.get_all_keys_product(command[8:]).split(','))
                         temp_user_data.temp_data(user_id)[user_id][3] = bot.send_photo(photo=product[0],
-                                                                                       caption=f'💎ID товара: {command[8:]}\nКлючей осталось: {keys_left}\n📨Описание: {product[2]}\n💸Цена: {product[1]}',
+                                                                                       caption=f'💎ID товара: {command[8:]}\nКлючей осталось: {keys_left}\n{product[2]}\n💸<b>Цена:</b> {product[1]}',
                                                                                        chat_id=user_id,
                                                                                        reply_markup=buttons.buy_btns(
-                                                                                           command[8:], product[3], product[4])).message_id
+                                                                                           command[8:], product[3], product[4]), parse_mode='HTML').message_id
                 elif command == 'my_buys':
                     data = db_actions.get_preview_from_sales(user_id)
-                    bot.send_message(user_id, 'Ваши покупки', reply_markup=buttons.purchased_btns(data))
+                    bot.send_message(user_id, 'Ваши покупки', reply_markup=buttons.purchased_btns(data), parse_mode='HTML')
                 elif command == 'back':
                     if temp_user_data.temp_data(user_id)[user_id][7] is not None:
                         bot.delete_message(user_id, temp_user_data.temp_data(user_id)[user_id][7])
@@ -533,7 +533,7 @@ def main():
                                     try:
                                         order_id = db_actions.add_sale([0, product[0], price, False, f'@{tg_nick}', user_id, key, profuct_id])
                                         order = payment.create_new_payment(f'Активационный ключ для {product[0]}', price, product[3], order_id)
-                                        msg_id = bot.send_message(user_id, 'Оплатить заказ', reply_markup=buttons.pay_btn(price, order[0])).message_id
+                                        msg_id = bot.send_message(user_id, 'Оплатить заказ', reply_markup=buttons.pay_btn(price, order[0]), parse_mode='HTML').message_id
                                         index_cache = len(temp_user_data.temp_data(user_id)[user_id][8])
                                         temp_user_data.temp_data(user_id)[user_id][9] += 1
                                         temp_user_data.temp_data(user_id)[user_id][8].append([msg_id, price, order[0], profuct_id])
@@ -545,20 +545,18 @@ def main():
                                                 keys.append(i)
                                         keys.append(key)
                                         db_actions.update_product(','.join(keys), 'key', profuct_id)
-                                        bot.send_message(user_id, 'Произошла ошибка, попробуйте ещё раз')
+                                        bot.send_message(user_id, 'Произошла ошибка, попробуйте ещё раз', parse_mode='HTML')
                                 else:
                                     bot.answer_callback_query(call.id, "Ключей нет в наличии", show_alert=True)
                         elif profuct_id in out:
                             bot.delete_message(user_id, data[0])
                             temp_user_data.temp_data(user_id)[user_id][8][index][0] = bot.send_message(user_id, 'Оплатить заказ',
-                                                                                                        reply_markup=buttons.pay_btn(data[1], data[2])).message_id
+                                                                                                        reply_markup=buttons.pay_btn(data[1], data[2]), parse_mode='HTML').message_id
                         else:
                             if not temp_user_data.temp_data(user_id)[user_id][10]:
                                 temp_user_data.temp_data(user_id)[user_id][10] = True
-                                msg_id = bot.send_message(user_id, 'Подождите 10 минут, чтобы купить новый товар').message_id
+                                msg_id = bot.send_message(user_id, 'Подождите 10 минут, чтобы купить новый товар', parse_mode='HTML').message_id
                                 threading.Thread(target=ban_10, args=(user_id, msg_id)).start()
-
-
                 elif command[:9] == 'purchased':
                     if command[9:] == '<main>':
                         if temp_user_data.temp_data(user_id)[user_id][4] is not None:
@@ -572,7 +570,7 @@ def main():
                             bot.delete_message(user_id, temp_user_data.temp_data(user_id)[user_id][4])
                         temp_user_data.temp_data(user_id)[user_id][4] = bot.send_message(user_id, text=content).message_id
             else:
-                bot.send_message(user_id, 'Введите /start для запуска бота')
+                bot.send_message(user_id, 'Введите /start для запуска бота', parse_mode='HTML')
 
     bot.polling(none_stop=True)
 
