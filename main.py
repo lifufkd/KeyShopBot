@@ -29,13 +29,16 @@ def get_subcot():
 
 
 def check_spam(user_id):
-    if int(time.time()) > temp_user_data.temp_data(user_id)[user_id][12]:
-        if temp_user_data.temp_data(user_id)[user_id][11] <= 10:
-            temp_user_data.temp_data(user_id)[user_id][11] += 1
-            return True
-        else:
-            temp_user_data.temp_data(user_id)[user_id][12] = int(time.time()) + 1800
-            bot.send_message(user_id, 'Вы заблокированы за спам на 30 минут')
+    if config.get_config()['activate_spam_block']:
+        if int(time.time()) > temp_user_data.temp_data(user_id)[user_id][12]:
+            if temp_user_data.temp_data(user_id)[user_id][11] <= 10:
+                temp_user_data.temp_data(user_id)[user_id][11] += 1
+                return True
+            else:
+                temp_user_data.temp_data(user_id)[user_id][12] = int(time.time()) + 1800
+                bot.send_message(user_id, 'Вы заблокированы за спам на 30 минут')
+    else:
+        return True
 
 
 def clear_clicks():
@@ -517,33 +520,34 @@ def main():
                                 index = temp_user_data.temp_data(user_id)[user_id][8].index(i)
                                 data = i
                             out.append(i[3])
-                        if profuct_id not in out and temp_user_data.temp_data(user_id)[user_id][9] < 3:
-                            for i in product[2].split(','):
-                                if i != '':
-                                    keys.append(i)
-                            if len(keys) != 0:
-                                key = random.choice(keys)
-                                keys.remove(key)
-                                db_actions.update_product(','.join(keys), 'key', profuct_id)
-                                price = product[1] - (int(product[1] / 100) * ((product[1] // config.get_config()['step_sale']) * config.get_config()['percent_sale']))
-                                try:
-                                    order_id = db_actions.add_sale([0, product[0], price, False, f'@{tg_nick}', user_id, key, profuct_id])
-                                    order = payment.create_new_payment(f'Активационный ключ для {product[0]}', price, product[3], order_id)
-                                    msg_id = bot.send_message(user_id, 'Оплатить заказ', reply_markup=buttons.pay_btn(price, order[0])).message_id
-                                    index_cache = len(temp_user_data.temp_data(user_id)[user_id][8])
-                                    temp_user_data.temp_data(user_id)[user_id][9] += 1
-                                    temp_user_data.temp_data(user_id)[user_id][8].append([msg_id, price, order[0], profuct_id])
-                                    threading.Thread(target=payment.shedule, args=(order_id, order[1], product[0], price, user_id, msg_id, bot, key, profuct_id, index_cache)).start()
-                                except Exception as e:
-                                    print(e)
-                                    for i in product[2].split(','):
-                                        if i != '':
-                                            keys.append(i)
-                                    keys.append(key)
+                        if profuct_id not in out:
+                            if temp_user_data.temp_data(user_id)[user_id][9] < 3 or not config.get_config()['activate_spam_block']:
+                                for i in product[2].split(','):
+                                    if i != '':
+                                        keys.append(i)
+                                if len(keys) != 0:
+                                    key = random.choice(keys)
+                                    keys.remove(key)
                                     db_actions.update_product(','.join(keys), 'key', profuct_id)
-                                    bot.send_message(user_id, 'Произошла ошибка, попробуйте ещё раз')
-                            else:
-                                bot.answer_callback_query(call.id, "Ключей нет в наличии", show_alert=True)
+                                    price = product[1] - (int(product[1] / 100) * ((product[1] // config.get_config()['step_sale']) * config.get_config()['percent_sale']))
+                                    try:
+                                        order_id = db_actions.add_sale([0, product[0], price, False, f'@{tg_nick}', user_id, key, profuct_id])
+                                        order = payment.create_new_payment(f'Активационный ключ для {product[0]}', price, product[3], order_id)
+                                        msg_id = bot.send_message(user_id, 'Оплатить заказ', reply_markup=buttons.pay_btn(price, order[0])).message_id
+                                        index_cache = len(temp_user_data.temp_data(user_id)[user_id][8])
+                                        temp_user_data.temp_data(user_id)[user_id][9] += 1
+                                        temp_user_data.temp_data(user_id)[user_id][8].append([msg_id, price, order[0], profuct_id])
+                                        threading.Thread(target=payment.shedule, args=(order_id, order[1], product[0], price, user_id, msg_id, bot, key, profuct_id, index_cache)).start()
+                                    except Exception as e:
+                                        print(e)
+                                        for i in product[2].split(','):
+                                            if i != '':
+                                                keys.append(i)
+                                        keys.append(key)
+                                        db_actions.update_product(','.join(keys), 'key', profuct_id)
+                                        bot.send_message(user_id, 'Произошла ошибка, попробуйте ещё раз')
+                                else:
+                                    bot.answer_callback_query(call.id, "Ключей нет в наличии", show_alert=True)
                         elif profuct_id in out:
                             bot.delete_message(user_id, data[0])
                             temp_user_data.temp_data(user_id)[user_id][8][index][0] = bot.send_message(user_id, 'Оплатить заказ',
@@ -582,6 +586,7 @@ if '__main__' == __name__:
     sheet = Excell(db)
     db_actions = DbAct(db, config)
     payment = Payment(config, db_actions, sheet, temp_user_data)
-    threading.Thread(target=clear_clicks).start()
+    if not config.get_config()['activate_spam_block']:
+        threading.Thread(target=clear_clicks).start()
     bot = telebot.TeleBot(config.get_config()['tg_api'])
     main()
