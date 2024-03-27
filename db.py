@@ -72,21 +72,28 @@ class DB:
             )
             ''')
             self.__db.commit()
-        else:
-            self.__db = sqlite3.connect(self.__db_path, check_same_thread=False)
-            self.__cursor = self.__db.cursor()
+            self.__db.close()
 
     def db_write(self, queri, args):
+        self.open_connection()
         self.set_lock()
         self.__cursor.execute(queri, args)
         self.__db.commit()
         self.realise_lock()
+        self.__db.close()
 
     def db_read(self, queri, args):
+        self.open_connection()
         self.set_lock()
         self.__cursor.execute(queri, args)
+        data = self.__cursor.fetchall()
         self.realise_lock()
-        return self.__cursor.fetchall()
+        self.__db.close()
+        return data
+
+    def open_connection(self):
+        self.__db = sqlite3.connect(self.__db_path, check_same_thread=False)
+        self.__cursor = self.__db.cursor()
 
     def set_lock(self):
         self.__lock.acquire(True)
