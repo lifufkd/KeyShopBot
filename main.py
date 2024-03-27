@@ -517,7 +517,7 @@ def main():
                                 index = temp_user_data.temp_data(user_id)[user_id][8].index(i)
                                 data = i
                             out.append(i[3])
-                        if profuct_id not in out and temp_user_data.temp_data(user_id)[user_id][9] <= 3:
+                        if profuct_id not in out and temp_user_data.temp_data(user_id)[user_id][9] < 3:
                             for i in product[2].split(','):
                                 if i != '':
                                     keys.append(i)
