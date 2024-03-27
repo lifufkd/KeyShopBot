@@ -19,7 +19,10 @@ class TempUserData:
 
     def temp_data(self, user_id):
         if user_id not in self.__user_data.keys():
-            self.__user_data.update({user_id: [None, [None, None, None, None, None, None, None, None], None, None, None, None, None, None, [], 0, False]}) # 1 - status, 2 - m
+            self.__user_data.update({user_id: [None, [None, None, None, None, None, None, None, None], None, None, None, None, None, None, [], 0, False, 0, 0]}) # 1 - status, 2 - m
+        return self.__user_data
+
+    def all_data(self):
         return self.__user_data
 
 
@@ -281,13 +284,13 @@ class Payment:
                                      f'Оплата совершена успешно, полная информация о вашей покупке продублирована в '
                                      f'Профиль>Мои покупки\nВаш лицензионный ключ: {key}')
                     break
-            except:
+            except Exception as e:
+                print(e)
                 pass
             time.sleep(1)
 
     def get_sha_key(self, amount, order_id, desc):
         s = f"{amount}{desc}{order_id}{self.__config.get_config()['terminal_password']}{self.__config.get_config()['token']}"
-        print(s)
         return hashlib.sha256(s.encode('utf-8')).hexdigest()
 
     def create_new_payment(self, name, price, desc, order_id):
