@@ -19,7 +19,10 @@ class TempUserData:
 
     def temp_data(self, user_id):
         if user_id not in self.__user_data.keys():
-            self.__user_data.update({user_id: [None, [None, None, None, None, None, None, None, None], None, None, None, None, None, None]}) # 1 - status, 2 - m
+            self.__user_data.update({user_id: [None, [None, None, None, None, None, None, None, None], None, None, None, None, None, None, [], 0, False, 0, 0]}) # 1 - status, 2 - m
+        return self.__user_data
+
+    def all_data(self):
         return self.__user_data
 
 
@@ -222,13 +225,14 @@ class DbAct:
 
 
 class Payment:
-    def __init__(self, config, db_act, sheet):
+    def __init__(self, config, db_act, sheet, temp_data):
         super(Payment, self).__init__()
         self.__config = config
         self.__db_act = db_act
         self.__sheet = sheet
+        self.__temp_data = temp_data
 
-    def shedule(self, order_id, payment_id, name, price, user_id, msg_id, bot, key, product_id):
+    def shedule(self, order_id, payment_id, name, price, user_id, msg_id, bot, key, product_id, index):
         c = 0
         keys = list()
         while True:
@@ -247,14 +251,16 @@ class Payment:
                             keys.append(i)
                     keys.append(key)
                     self.__db_act.update_product(','.join(keys), 'key', product_id)
-                    bot.delete_message(user_id, msg_id)
+                    bot.delete_message(user_id, self.__temp_data.temp_data(user_id)[user_id][8][index][0])
+                    del self.__temp_data.temp_data(user_id)[user_id][8][index]
                     bot.send_message(user_id, "Время на оплату истекло, попробуйте ещё раз")
                     break # end deny pay
                 elif status in ['AUTH_FAIL', 'REJECTED']:
                     timee = time.time()
                     self.__db_act.update_sale(timee, False, order_id)
                     self.__sheet.add_sale(
-                        [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price, 'Отклонена',
+                        [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price,
+                         'Отклонена',
                          user_id, 'Нет'])
                     product = self.__db_act.get_product_by_id_for_buy(product_id)
                     for i in product[2].split(','):
@@ -262,7 +268,8 @@ class Payment:
                             keys.append(i)
                     keys.append(key)
                     self.__db_act.update_product(','.join(keys), 'key', product_id)
-                    bot.delete_message(user_id, msg_id)
+                    bot.delete_message(user_id, self.__temp_data.temp_data(user_id)[user_id][8][index][0])
+                    del self.__temp_data.temp_data(user_id)[user_id][8][index]
                     bot.send_message(user_id, "Оплата не успешна, попробуйте ещё раз")
                     break
                 elif status in ['CONFIRMED', 'AUTHORIZED']:
@@ -271,31 +278,32 @@ class Payment:
                     self.__sheet.add_sale(
                         [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price, 'Успешна',
                          user_id, key])
-                    bot.delete_message(user_id, msg_id)
+                    bot.delete_message(user_id, self.__temp_data.temp_data(user_id)[user_id][8][index][0])
+                    del self.__temp_data.temp_data(user_id)[user_id][8][index]
                     bot.send_message(user_id,
                                      f'Оплата совершена успешно, полная информация о вашей покупке продублирована в '
                                      f'Профиль>Мои покупки\nВаш лицензионный ключ: {key}')
                     break
-            except:
+            except Exception as e:
+                print(e)
                 pass
             time.sleep(1)
 
     def get_sha_key(self, amount, order_id, desc):
         s = f"{amount}{desc}{order_id}{self.__config.get_config()['terminal_password']}{self.__config.get_config()['token']}"
-        print(s)
         return hashlib.sha256(s.encode('utf-8')).hexdigest()
 
     def create_new_payment(self, name, price, desc, order_id):
         api_url = "https://securepay.tinkoff.ru/v2/Init"
         payload = {
-            "TerminalKey": str(self.__config.get_config()['token']),
-            "Amount": price * 100,
-            "OrderId": order_id,
-            "Token": self.get_sha_key(price * 100, order_id, name),
-            "Description": name,
-            "DATA": {
-                "Email": "ваша@почта.ru"},
-            "Receipt": {
+                "TerminalKey": str(self.__config.get_config()['token']),
+                "Amount": price*100,
+                "OrderId": order_id,
+                "Token": self.get_sha_key(price*100, order_id, name),
+                "Description": name,
+                "DATA": {
+                    "Email": "ваша@почта.ru"},
+                "Receipt": {
                 "Email": "ваша@почта.ru",
                 "Taxation": "osn",
                 "Items": [
@@ -303,7 +311,7 @@ class Payment:
                         "Name": name,
                         "Price": 10000,
                         "Quantity": 1.00,
-                        "Amount": price * 100,
+                        "Amount": price*100,
                         "Tax": "none"
                     },
                 ]
