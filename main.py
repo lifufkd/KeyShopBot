@@ -478,7 +478,7 @@ def main():
                             bot.delete_message(user_id, temp_user_data.temp_data(user_id)[user_id][3])
                         keys_left = len(db_actions.get_all_keys_product(command[8:]).split(','))
                         temp_user_data.temp_data(user_id)[user_id][3] = bot.send_photo(photo=product[0],
-                                                                                       caption=f'💎ID товара: {command[8:]}\nКлючей осталось: {keys_left}\n{product[2]}\n💸<b>Цена:</b> {product[1]}',
+                                                                                       caption=f'💎ID товара: {command[8:]}\nКлючей осталось: {keys_left}\n\n{product[2]}\n\n💸<b>Цена:</b> {product[1]}',
                                                                                        chat_id=user_id,
                                                                                        reply_markup=buttons.buy_btns(
                                                                                            command[8:], product[3], product[4]), parse_mode='HTML').message_id
