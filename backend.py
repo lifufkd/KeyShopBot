@@ -3,6 +3,7 @@
 #                SBR                #
 #               zzsxd               #
 #####################################
+import copy
 import time
 import gspread
 import hashlib
@@ -250,9 +251,6 @@ class Payment:
                 if c >= self.__config.get_config()['payment_timeout'] * 60:
                     timee = time.time()
                     self.__db_act.update_sale(timee, False, order_id)
-                    self.__sheet.add_sale(
-                        [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price, 'Время на оплату истекло',
-                         user_id, 'Нет'])
                     product = self.__db_act.get_product_by_id_for_buy(product_id)
                     for i in product[2].split(','):
                         if i != '':
@@ -260,16 +258,16 @@ class Payment:
                     keys.append(key)
                     self.__db_act.update_product(','.join(keys), 'key', product_id)
                     bot.delete_message(user_id, self.__temp_data.temp_data(user_id)[user_id][8][index][0])
-                    del self.__temp_data.temp_data(user_id)[user_id][8][index]
+                    self.__temp_data.temp_data(user_id)[user_id][8][index] = copy.deepcopy([])
                     bot.send_message(user_id, "Время на оплату истекло, попробуйте ещё раз")
+                    self.__sheet.add_sale(
+                        [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price,
+                         'Время на оплату истекло',
+                         user_id, 'Нет'])
                     break # end deny pay
                 elif status in ['AUTH_FAIL', 'REJECTED']:
                     timee = time.time()
                     self.__db_act.update_sale(timee, False, order_id)
-                    self.__sheet.add_sale(
-                        [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price,
-                         'Отклонена',
-                         user_id, 'Нет'])
                     product = self.__db_act.get_product_by_id_for_buy(product_id)
                     for i in product[2].split(','):
                         if i != '':
@@ -277,21 +275,25 @@ class Payment:
                     keys.append(key)
                     self.__db_act.update_product(','.join(keys), 'key', product_id)
                     bot.delete_message(user_id, self.__temp_data.temp_data(user_id)[user_id][8][index][0])
-                    del self.__temp_data.temp_data(user_id)[user_id][8][index]
+                    self.__temp_data.temp_data(user_id)[user_id][8][index] = copy.deepcopy([])
                     bot.send_message(user_id, "Оплата не успешна, попробуйте ещё раз")
+                    self.__sheet.add_sale(
+                        [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price,
+                         'Отклонена',
+                         user_id, 'Нет'])
                     break
                 elif status in ['CONFIRMED', 'AUTHORIZED']:
                     timee = time.time()
                     self.__db_act.update_sale(timee, True, order_id)
-                    self.__sheet.add_sale(
-                        [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price, 'Успешна',
-                         user_id, key])
-                    self.__db_act.add_pay_amount(self, user_id, price)
+                    self.__db_act.add_pay_amount(user_id, price)
                     bot.delete_message(user_id, self.__temp_data.temp_data(user_id)[user_id][8][index][0])
-                    del self.__temp_data.temp_data(user_id)[user_id][8][index]
+                    self.__temp_data.temp_data(user_id)[user_id][8][index] = copy.deepcopy([])
                     bot.send_message(user_id,
                                      f'Оплата совершена успешно, полная информация о вашей покупке продублирована в '
                                      f'Профиль>Мои покупки\nВаш лицензионный ключ: {key}')
+                    self.__sheet.add_sale(
+                        [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price, 'Успешна',
+                         user_id, key])
                     break
             except Exception as e:
                 print(e)
