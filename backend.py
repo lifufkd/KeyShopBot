@@ -73,7 +73,8 @@ class DbAct:
                 is_admin = True
             else:
                 is_admin = False
-            self.__db.db_write('INSERT INTO users (user_id, first_name, last_name, nick_name, is_admin) VALUES (?, ?, ?, ?, ?)', (user_id, first_name, last_name, nick_name, is_admin))
+            self.__db.db_write('INSERT INTO users (user_id, first_name, last_name, nick_name, is_admin, pay_amount) VALUES '
+                               '(?, ?, ?, ?, ?, ?)', (user_id, first_name, last_name, nick_name, is_admin, 0))
 
     def user_is_existed(self, user_id):
         data = self.__db.db_read('SELECT count(*) FROM users WHERE user_id = ?', (user_id, ))
@@ -223,6 +224,13 @@ class DbAct:
     def check_already_open_sale(self, user_id):
         return self.__db.db_read(f'SELECT count(*) FROM sales WHERE user_id = ? AND time = ?', (user_id, 0))[0][0]
 
+    def get_all_amount(self, user_id):
+        return self.__db.db_read('SELECT pay_amount FROM users WHERE user_id = ?', (user_id, ))[0][0]
+
+    def add_pay_amount(self, user_id, amount):
+        new_amount = self.get_all_amount(user_id) + amount
+        self.__db.db_write('UPDATE users SET pay_amount = ? WHERE user_id = ?', (new_amount, user_id))
+
 
 class Payment:
     def __init__(self, config, db_act, sheet, temp_data):
@@ -278,6 +286,7 @@ class Payment:
                     self.__sheet.add_sale(
                         [datetime.fromtimestamp(timee).strftime('%d.%m.%Y %H:%M:%S'), name, price, 'Успешна',
                          user_id, key])
+                    self.__db_act.add_pay_amount(self, user_id, price)
                     bot.delete_message(user_id, self.__temp_data.temp_data(user_id)[user_id][8][index][0])
                     del self.__temp_data.temp_data(user_id)[user_id][8][index]
                     bot.send_message(user_id,
@@ -286,7 +295,6 @@ class Payment:
                     break
             except Exception as e:
                 print(e)
-                pass
             time.sleep(1)
 
     def get_sha_key(self, amount, order_id, desc):

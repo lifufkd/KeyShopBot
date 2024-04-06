@@ -31,7 +31,7 @@ def get_subcot():
 def check_spam(user_id):
     if config.get_config()['activate_spam_block']:
         if int(time.time()) > temp_user_data.temp_data(user_id)[user_id][12]:
-            if temp_user_data.temp_data(user_id)[user_id][11] <= 10:
+            if temp_user_data.temp_data(user_id)[user_id][11] <= 20:
                 temp_user_data.temp_data(user_id)[user_id][11] += 1
                 return True
             else:
@@ -478,7 +478,7 @@ def main():
                             bot.delete_message(user_id, temp_user_data.temp_data(user_id)[user_id][3])
                         keys_left = len(db_actions.get_all_keys_product(command[8:]).split(','))
                         temp_user_data.temp_data(user_id)[user_id][3] = bot.send_photo(photo=product[0],
-                                                                                       caption=f'💎ID товара: {command[8:]}\nКлючей осталось: {keys_left}\n{product[2]}\n\n💸<b>Цена:</b> {product[1]}',
+                                                                                       caption=f'💎ID товара: {command[8:]}\nКлючей осталось: {keys_left}\n\n{product[2]}\n\n💸<b>Цена:</b> {product[1]}',
                                                                                        chat_id=user_id,
                                                                                        reply_markup=buttons.buy_btns(
                                                                                            command[8:], product[3], product[4]), parse_mode='HTML').message_id
@@ -529,7 +529,9 @@ def main():
                                     key = random.choice(keys)
                                     keys.remove(key)
                                     db_actions.update_product(','.join(keys), 'key', profuct_id)
-                                    price = product[1] - (int(product[1] / 100) * ((product[1] // config.get_config()['step_sale']) * config.get_config()['percent_sale']))
+                                    all_spent = db_actions.get_all_amount(user_id)
+                                    percent_discount = ((all_spent // config.get_config()['step_sale']) * config.get_config()['percent_sale'])
+                                    price = int(product[1] - ((percent_discount * product[1]) / 100))
                                     try:
                                         order_id = db_actions.add_sale([0, product[0], price, False, f'@{tg_nick}', user_id, key, profuct_id])
                                         order = payment.create_new_payment(f'Активационный ключ для {product[0]}', price, product[3], order_id)
